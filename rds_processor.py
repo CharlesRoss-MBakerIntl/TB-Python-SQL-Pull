@@ -232,7 +232,8 @@ class RDS:
 
                     #Create Archive Package
                     self.archive = {
-                        "Duplicates": self.duplicates
+                        "Duplicates": self.duplicates,
+                        "Data": self.df
                     }
 
 

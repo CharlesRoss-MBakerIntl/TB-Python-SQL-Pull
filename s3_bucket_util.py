@@ -105,7 +105,8 @@ def update_active_data(s3, bucket, project_folder, active_folder, file_name, dat
             except Exception as e:
                 raise Exception(f"Error: Failed to Overwrite Active csv file {file_name} in {project_folder}")
         else:
-            raise Exception(f"Error: Could not update active csv, '{file_name}' does not exist within {project_folder}")
+            #If first upload, Place CSV
+            s3.put_object(Bucket = bucket, Key = folder_prefix, Body = data.to_csv())
         
     except Exception as e:
         raise Exception(f"Error: Could not update active csv file in {project_folder}: {e}")
@@ -187,47 +188,19 @@ def add_archive_package(s3, bucket, project_folder, archive_folder, date_folder,
 
 
             #Load Removed Content
-            elif section == "Removed":
+            elif section == "Data":
+                
+                #Set Date for Copy
+                date = datetime.now().strftime('%Y-%m-%d-%H:%M:%S')
                 
                 #Set Folder Path
-                folder_prefix = project_folder + archive_folder + date_folder + "Removed.csv"
+                folder_prefix = project_folder + archive_folder + date_folder + "Archived-Data-" + date + ".csv"
 
                 #Upload to Folder
                 try:
                     s3.put_object(Bucket = bucket, Key = folder_prefix, Body = content.to_csv())
                 except Exception as e:
-                    raise Exception(f"Error: Failed to Upload Removed Etnries to S3 {project_folder + archive_folder + date_folder}")
-
-
-            #Load Cleaning Steps Content
-            elif section == "Cleaning Steps":
-                
-                #Cycle Through Cleaning Steps
-                for step in content:
-
-                    #Create Number Count
-                    if step_count < 10:
-                        count = f"0{step_count}"
-                    else:
-                        count = f"{step_count}"
-
-                    # Create File Name
-                    if step['Field'] == None:
-                        file_name = f"{count} - {step['Step']}.csv"
-                    else:
-                        file_name = f"{count} - {step['Field']} - {step['Step']}.csv"
-
-                    #Create Folder Path to Today's Folder and Cleaning Steps Folder
-                    folder_prefix = project_folder + archive_folder + date_folder + "Cleaning Steps/" + file_name
-
-                    #Upload to Folder
-                    try:
-                        s3.put_object(Bucket = bucket, Key = folder_prefix, Body = step['Result'].to_csv())
-                    except Exception as e:
-                        raise Exception(f"Error: Failed to Upload {file_name} to S3 {project_folder + archive_folder + date_folder}")
-
-                    #Add to File Count After Complete
-                    step_count += 1
+                    raise Exception(f"Error: Failed to Upload Archived Data to S3 {project_folder + archive_folder + date_folder}")
 
 
     except Exception as e:

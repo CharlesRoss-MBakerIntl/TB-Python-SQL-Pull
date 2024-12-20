@@ -6,7 +6,7 @@ def set_project(sel_project):
         #Project Dictionary
         project_dictionary = {
             "Helene": 34,
-            'Mitlon': 0 
+            'Mitlon': 37 
         }
 
         project_id = project_dictionary[sel_project]
